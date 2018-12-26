@@ -27,6 +27,7 @@ pip install pandas numpy requests
 
 
 
+
 ##IMPORTANT - INSTALL AIRFLOW - INSTALL AIRFLOW - INSTALL AIRFLOW
 ##Make directory called 'airflow', inside of it, make a director called 'dags'
 

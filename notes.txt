@@ -7,42 +7,58 @@
 echo "Performing apt-get update"
 #first to general update:
 sudo apt-get update
+sudo apt-get install build-essential
+sudo apt-get install zlib1g-dev
+yes | sudo apt-get install libssl-dev libbz2-dev libreadline-dev libsqlite3-dev
 
 
-##IMPORTANT - TO INSTALL PYENV - TO INSTALL PYENV - TO INSTALL PYENV - TO INSTALL PYENV 
-##This simple install of PYENV was found @ https://gist.github.com/softwaredoug/a871647f53a0810c55ac
-yes | sudo apt-get install git python-pip make build-essential libssl-dev zlib1g-dev libbz2-dev libreadline-dev libsqlite3-dev
-yes | sudo pip install virtualenvwrapper
-
-git clone https://github.com/yyuu/pyenv.git ~/.pyenv
-git clone https://github.com/yyuu/pyenv-virtualenvwrapper.git ~/.pyenv/plugins/pyenv-virtualenvwrapper
+git clone https://github.com/pyenv/pyenv.git ~/.pyenv
 
 echo 'export PYENV_ROOT="$HOME/.pyenv"' >> ~/.bashrc
 echo 'export PATH="$PYENV_ROOT/bin:$PATH"' >> ~/.bashrc
-echo 'eval "$(pyenv init -)"' >> ~/.bashrc
-echo 'pyenv virtualenvwrapper' >> ~/.bashrc
+echo -e 'if command -v pyenv 1>/dev/null 2>&1; then\n  eval "$(pyenv init -)"\nfi' >> ~/.bashrc
 
 exec "$SHELL"
 
 pyenv install 3.6.2
 pyenv global 3.6.2 
 
+pip install pandas numpy requests   
+
 
 
 ##IMPORTANT - INSTALL AIRFLOW - INSTALL AIRFLOW - INSTALL AIRFLOW
+##Make directory called 'airflow', inside of it, make a director called 'dags'
 
 echo 'export AIRFLOW_HOME=~/airflow' >> ~/.bashrc
 SLUGIFY_USES_TEXT_UNIDECODE=yes pip install apache-airflow
+
+#Then will need to add airflow to path , ubuntu: in the ~/.bashrc add
+#export PATH="/home/ubuntu/.local/lib/python2.7/site-packages/airflow/bin:$PATH"
+#then will need to restart the terminal, source ~/.bashrc
+#or just exit out of the terminal and go back in, seems to work better 
+
 airflow initdb
  
 ##Then need to configure the airflow.cfg file with the following
-mkdir -p /home/ubuntu/airflow/dags/
+##NEed to make sure that based off of line dags_folder line, that the directory exists: mkdir -p /home/ubuntu/airflow/dags/
 
 #load_examplesvariable to False. Save and quit.
+#catchup_by_default = False
+
+#need to also modify the .cfg file for the EMAIL stuff 
+#https://stackoverflow.com/questions/51829200/how-to-set-up-airflow-send-email
+#smtp_host
+
 
 ## Then can run it: 
+#nohup airflow webserver > /home/ubuntu/airflow/logs/webserver.logs &
+#nohup airflow scheduler > /home/ubuntu/airflow/logs/scheduler.logs &
 #airflow webserver -p 8080
 #airflow scheduler
+
+##NOTE- if get error, missing OSError: [Errno 2] No such file or directory -- it is prob related to permissions, not being in path
+##based off the error message, move that location, folder into the path: e.g., export PATH="/usr/lib/python2.7:$PATH"
 
 
 Echo "INSTALLING a bunch of PIP packages" 
@@ -66,6 +82,10 @@ pip freeze > requirements.txt	##this will create a requirements doc with the pip
 
 ##note - currently flask.ext is broken, perhaps installed older version of flask and autoindex
 ##Create a python flask app that has this below, so can access the file system
+
+pip install Flask-AutoIndex
+
+
 import os.path
 from flask import Flask
 from flask.ext.autoindex import AutoIndex
